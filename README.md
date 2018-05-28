@@ -1,13 +1,13 @@
 # PoE/Tyranny Language Merger
 ## What works
 
--Merging conversation text
--Pillars of Eternity and Tyranny
+* Merging conversation text
+* Pillars of Eternity and Tyranny
 
 ## What doesn't work (maybe/yet...)
 
--Merging game/quest text
--Merging FemaleText
+* Merging game/quest text
+* Merging FemaleText
 
 ## How to
 
