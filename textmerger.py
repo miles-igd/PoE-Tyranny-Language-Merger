@@ -10,28 +10,39 @@ import ast
 
 class App:
     def __init__(self, master):
+        self.game_files_to_merge = ["interactables.stringtable", "loadingtips.stringtable", "lifepath.stringtable", "missives.stringtable", "notifications.stringtable", "reputationchangereasons.stringtable", "stronghold.stringtable", "subtitles.stringtable" ]
         self.locations = []
         self.languages = []
         self.valid = False
-
+        ##ROW 0__
         self.pathLabel = Label(master, text="Game Folder:")
         self.pathEntry = Entry(master, width=50)
         self.pathEntry.bind("<Key>", self.keypress)
         self.pathButton = Button(master, text="...", width=3, command=self.setRootPath)
-
+        ##ROW 1__
         self.gameName = StringVar()
         self.gameLabel = Label(master, text="Game:")
         self.gameNameLabel = Label(master, textvariable=self.gameName)
-
+        #ROW 2__
         self.primaryLabel = Label(master, text="Primary Language")
         self.statusVar = StringVar()
         self.statusLabel = Label(master, textvariable=self.statusVar)
         self.secondaryLabel = Label(master, text = "<Secondary Language>")
-
+        #ROW 3__
         self.primaryList = ttk.Combobox(master, justify="center", state="readonly", width=25)
         self.mergeButton = Button(master, text="Merge", command=self.mergeText)
         self.secondaryList = ttk.Combobox(master, justify="center", state="readonly", width=25)
-
+        #ROW ___
+        self.convVar = IntVar()
+        self.convVar.set(1)
+        self.conversationsCheck = Checkbutton(master, text="Conversations", variable = self.convVar)
+        self.questsVar = IntVar()
+        self.questsVar.set(1)
+        self.questsCheck = Checkbutton(master, text="Quests", variable = self.questsVar)
+        self.gameVar = IntVar()
+        self.gameVar.set(0)
+        self.gameCheck = Checkbutton(master, text= "Game", variable = self.gameVar)
+        #LAYOUT__
         self.pathLabel.grid(row=0, sticky=E)
         self.pathEntry.grid(row=0, column=1)
         self.pathButton.grid(row=0, column=2, sticky=W)
@@ -46,6 +57,10 @@ class App:
         self.primaryList.grid(row=3, column=0)
         self.mergeButton.grid(row=3, column=1)
         self.secondaryList.grid(row=3, column=2)
+
+        self.conversationsCheck.grid(row=4, column=1, sticky=W)
+        self.questsCheck.grid(row=5, column=1, sticky=W)
+        self.gameCheck.grid(row=6, column=1, sticky=W)
 
     def keypress(self, key, *args):
         if key.keycode == 13:
@@ -128,6 +143,10 @@ class App:
         self.secondaryList.current(1)
 
     def mergeText(self, *args):
+        if self.convVar.get() == 0 and self.questsVar.get() == 0 and self.gameVar.get() == 0:
+            messagebox.showerror(title="ERROR", message="Please check which files to merge")
+            return None
+
         if self.valid:
             self.statusVar.set("Working...")
             primaryLanguage = ast.literal_eval(self.primaryList.get())
@@ -139,20 +158,25 @@ class App:
 
             for locPath in self.locations:
                 rootPath = locPath
-                primaryPath = rootPath / primaryLanguage['code'] / 'text' / 'conversations'
-                secondaryPath = rootPath / secondaryLanguage['code'] / 'text' / 'conversations'
-                newPath = rootPath / self.newCode / 'text' / 'conversations'
+                primaryPath = rootPath / primaryLanguage['code'] / 'text'
+                secondaryPath = rootPath / secondaryLanguage['code'] / 'text'
+                newPath = rootPath / self.newCode / 'text'
                 print("Copying...")
                 try:
                     copytree(rootPath / primaryLanguage['code'], rootPath / self.newCode)
                 except FileExistsError:
                     #messagebox.showerror(title="ERROR", message= self.newCode + " folder already exists" )
                     newPath.mkdir(parents=True, exist_ok=True)
-                    self.statusVar.set("Error, directory exists, contining...")
+                    self.statusVar.set("Error, directory exists, continuing...")
                 print("Done copying.")
 
                 print("Merging...", locPath)
-                self.searchStringtables(primaryPath, secondaryPath, newPath)
+                if self.convVar.get() == 1:
+                    self.searchStringtables(primaryPath / 'conversations', secondaryPath / 'conversations', newPath / 'conversations')
+                if self.questsVar.get() == 1:
+                    self.searchStringtables(primaryPath / 'quests', secondaryPath / 'quests', newPath / 'quests')
+                if self.gameVar.get() == 1:
+                    self.searchStringtables(primaryPath / 'game', secondaryPath / 'game', newPath / 'game', self.game_files_to_merge)
 
             rootPath = self.locations[0]
             self.createLanguageXML(rootPath / primaryLanguage['code'] / "language.xml", rootPath / self.newCode / "language.xml")
@@ -160,13 +184,32 @@ class App:
             print("Done merging.")
         else:
             messagebox.showerror(title="ERROR", message="Game folder not found")
+            return None
 
 
-    def searchStringtables(self, primaryPath, secondaryPath, newPath):
+    def searchStringtables(self, primaryPath, secondaryPath, newPath, specificFiles = None):
+        if not primaryPath.exists():
+            print(primaryPath, "does not exist")
+            return None
+
         for child in primaryPath.iterdir():
             if child.is_dir():
                 newPath.mkdir(parents=True, exist_ok=True)
                 self.searchStringtables(child, secondaryPath / child.relative_to(primaryPath), newPath / child.relative_to(primaryPath))
+
+            elif specificFiles is not None:
+                print("Special case, checking", child.name)
+                if child.name in specificFiles:
+                    print("Merging", child.name)
+                    newFile = newPath / child.name
+                    try:
+                        newFile.touch(exist_ok=True)
+                    except:
+                        print("No parent folder, creating parent folder...")
+                        newFile.parent.mkdir(parents=True, exist_ok=True)
+                        newFile.touch(exist_ok=True)
+
+                    self.mergeFile(child, secondaryPath / child.name, newFile)
 
             elif child.suffix == ".stringtable":
                 newFile = newPath / child.name
@@ -180,7 +223,8 @@ class App:
                 self.mergeFile(child, secondaryPath / child.name, newFile)
 
             else:
-                return None
+                continue
+        return None
 
     def mergeFile(self, primaryFile, secondaryFile, newFile):
         primaryTree = ET.parse(primaryFile)
