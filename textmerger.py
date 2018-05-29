@@ -129,8 +129,12 @@ class App:
                 primaryPath = rootPath / primaryLanguage['code'] / 'text' / 'conversations'
                 secondaryPath = rootPath / secondaryLanguage['code'] / 'text' / 'conversations'
                 newPath = rootPath / self.newCode / 'text' / 'conversations'
-                copytree(rootPath / primaryLanguage['code'], rootPath / self.newCode)
-                #newPath.mkdir(parents=True, exist_ok=True)
+                try:
+                    copytree(rootPath / primaryLanguage['code'], rootPath / self.newCode)
+                except FileExistsError:
+                    #messagebox.showerror(title="ERROR", message= self.newCode + " folder already exists" )
+                    newPath.mkdir(parents=True, exist_ok=True)
+                    self.statusVar.set("Error, directory exists, contining...")
 
                 self.searchStringtables(primaryPath, secondaryPath, newPath)
 
@@ -140,7 +144,6 @@ class App:
         else:
             messagebox.showerror(title="ERROR", message="Game folder not found")
 
-    #def mergeAction(self, primaryPath, secondaryPath):
     def searchStringtables(self, primaryPath, secondaryPath, newPath):
         for child in primaryPath.iterdir():
             if child.is_dir():
@@ -181,11 +184,21 @@ class App:
                     secondaryDefaultText = child.find("DefaultText")
                     secondaryFemaleText = child.find("FemaleText")
 
-            try:
-                primaryDefaultText.text = primaryDefaultText.text + " «" + secondaryDefaultText.text + "»"
-            except:
-                print("NoneType at: " + primaryID.text)
+            if primaryFemaleText.text is not None and secondaryFemaleText.text is not None:
+                primaryFemaleText.text = primaryFemaleText.text + " «" + secondaryFemaleText.text + "»"
+            elif primaryFemaleText.text is None and secondaryFemaleText.text is not None:
+                primaryFemaleText.text = primaryDefaultText.text + " «" + secondaryFemaleText.text + "»"
+            elif primaryFemaleText.text is not None and secondaryFemaleText.text is None:
+                primaryFemaleText.text = primaryFemaleText.text + " «" + secondaryDefaultText.text + "»"
+            else:
                 pass
+                #print("NoneType FemaleText at: " + primaryID.text)
+
+            if primaryDefaultText.text is not None and secondaryDefaultText.text is not None:
+                primaryDefaultText.text = primaryDefaultText.text + " «" + secondaryDefaultText.text + "»"
+            else:
+                pass
+                #print("NoneType DefaultText at: " + primaryID.text)
 
         primaryTree.write(newFile, encoding="utf-8", xml_declaration=True, method="xml")
 
