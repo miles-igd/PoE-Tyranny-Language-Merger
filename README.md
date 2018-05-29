@@ -2,19 +2,20 @@
 ## What works
 
 * Merging conversation text
+* Merging quest description text
+* Merging some gameUI text
 * Pillars of Eternity and Tyranny
-
-## What doesn't work (yet...)
-
-* Merging game/quest text
 
 ## How to
 
-1. Use ... to locate game folder (where Tyranny.exe or PillarsOfEternity.exe is located)
-2. Choose the primary language on the left, which will be the language of the UI and the quest descriptions.
-3. Choose the secondary language on the right, which will be next to the primary language (conversations only right now)
-4. Press merge and wait.
-5. In game the new language should be shown as PrimaryLanguage/SecondaryLanguage (e.g English/French)
+1. Download latest release.zip and unzip.
+2. Run textmerger.exe
+3. Enter the folder that the game .exe is located in (e.g for me it's C:\GOG Games\Tyranny). Use the ... button or just paste and press enter.
+4. Wait until it finds the languages.
+5. Choose the primary language and the secondary language. The primary language will be the main language of the game.
+6. Check the checkboxes you want to merge.
+7. Press 'Merge' and wait until it says it's done.
+8. In-game change the language to PrimaryLanguage/SecondaryLanguage (e.g English/French)
 
 This doesn't delete or replace the original languages but creates a new merged one.
 
