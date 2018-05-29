@@ -16,6 +16,7 @@ class App:
 
         self.pathLabel = Label(master, text="Game Folder:")
         self.pathEntry = Entry(master, width=50)
+        self.pathEntry.bind("<Key>", self.keypress)
         self.pathButton = Button(master, text="...", width=3, command=self.setRootPath)
 
         self.gameName = StringVar()
@@ -46,6 +47,13 @@ class App:
         self.mergeButton.grid(row=3, column=1)
         self.secondaryList.grid(row=3, column=2)
 
+    def keypress(self, key, *args):
+        if key.keycode == 13:
+            print("Searching...")
+            self.gameName.set("Searching...")
+            self.validPath(self.pathEntry.get())
+        print("Done searching.")
+
     def recursiveDir(self, filepath, query, locations = []):
         for child in filepath.iterdir():
             if child.is_dir():
@@ -56,12 +64,7 @@ class App:
 
         return locations
 
-    def setRootPath(self, *args):
-        filepath = filedialog.askdirectory(initialdir = "/", title="Select file")
-        if (filepath == ""):
-            return None
-        self.pathEntry.delete(0, END)
-        self.pathEntry.insert(0, filepath)
+    def validPath(self, filepath):
         aName = self.findGame(filepath)
         self.gameName.set(aName)
         if aName:
@@ -72,6 +75,16 @@ class App:
             self.valid = False
             self.gameName.set("Need valid filepath!")
             messagebox.showerror(title="ERROR", message="No .exe found")
+
+    def setRootPath(self, *args):
+        filepath = filedialog.askdirectory(initialdir = "/", title="Select file")
+        if (filepath == ""):
+            return None
+        print("Searching...")
+        self.pathEntry.delete(0, END)
+        self.pathEntry.insert(0, filepath)
+        self.validPath(filepath)
+        print("Done searching.")
 
     def findLanguages(self, filepath):
         locations = []
@@ -129,20 +142,25 @@ class App:
                 primaryPath = rootPath / primaryLanguage['code'] / 'text' / 'conversations'
                 secondaryPath = rootPath / secondaryLanguage['code'] / 'text' / 'conversations'
                 newPath = rootPath / self.newCode / 'text' / 'conversations'
+                print("Copying...")
                 try:
                     copytree(rootPath / primaryLanguage['code'], rootPath / self.newCode)
                 except FileExistsError:
                     #messagebox.showerror(title="ERROR", message= self.newCode + " folder already exists" )
                     newPath.mkdir(parents=True, exist_ok=True)
                     self.statusVar.set("Error, directory exists, contining...")
+                print("Done copying.")
 
+                print("Merging...", locPath)
                 self.searchStringtables(primaryPath, secondaryPath, newPath)
 
             rootPath = self.locations[0]
             self.createLanguageXML(rootPath / primaryLanguage['code'] / "language.xml", rootPath / self.newCode / "language.xml")
             self.statusVar.set("Done!")
+            print("Done merging.")
         else:
             messagebox.showerror(title="ERROR", message="Game folder not found")
+
 
     def searchStringtables(self, primaryPath, secondaryPath, newPath):
         for child in primaryPath.iterdir():
@@ -219,6 +237,7 @@ class App:
 
 root = Tk()
 root.resizable(False, False)
+root.title("PoE/Tyranny Text Merger")
 
 app = App(root)
 
