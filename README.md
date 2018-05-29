@@ -17,3 +17,8 @@
 5. In game the new language should be shown as PrimaryLanguage/SecondaryLanguage (e.g English/French)
 
 This doesn't delete or replace the original languages but creates a new merged one.
+
+## Example
+
+![1](https://i.imgur.com/V8zgvNw.jpg)
+![2](https://i.imgur.com/1SeGvUw.jpg)
