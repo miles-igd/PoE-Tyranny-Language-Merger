@@ -248,9 +248,9 @@ class App:
 
             if primaryFemaleText.text is not None and secondaryFemaleText.text is not None:
                 primaryFemaleText.text = primaryFemaleText.text + " «" + secondaryFemaleText.text + "»"
-            elif primaryFemaleText.text is None and secondaryFemaleText.text is not None:
+            elif primaryFemaleText.text is None and secondaryFemaleText.text is not None and primaryDefaultText.text is not None:
                 primaryFemaleText.text = primaryDefaultText.text + " «" + secondaryFemaleText.text + "»"
-            elif primaryFemaleText.text is not None and secondaryFemaleText.text is None:
+            elif primaryFemaleText.text is not None and secondaryFemaleText.text is None and secondaryDefaultText.text is not None:
                 primaryFemaleText.text = primaryFemaleText.text + " «" + secondaryDefaultText.text + "»"
             else:
                 pass
