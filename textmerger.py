@@ -123,12 +123,13 @@ class App:
     def findGame(self, filepath):
         name = ""
         rootPath = Path(filepath)
-        for child in rootPath.iterdir():
-            if child.name == "PillarsOfEternity.exe":
+        files = (child for child in rootPath.iterdir() if child.is_file())
+        for file in files:
+            if file.name == "PillarsOfEternity.exe":
                 return "Pillars of Eternity"
-            elif child.name == "Tyranny.exe":
+            elif file.name == "Tyranny.exe":
                 return "Tyranny"
-            elif child.name == "PillarsOfEternity2.exe":
+            elif file.name in ["PillarsOfEternity2.exe", "PillarsOfEternityII.exe"]:
                 return "Pillars of Eternity II: Deadfire"
             else:
                 continue
