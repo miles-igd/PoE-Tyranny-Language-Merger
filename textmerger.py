@@ -3,7 +3,8 @@ from tkinter import ttk
 from tkinter import messagebox
 from tkinter import *
 from pathlib import Path
-from shutil import copytree
+from shutil import copytree, copyfile
+import os
 
 import xml.etree.ElementTree as ET
 import ast
@@ -35,13 +36,13 @@ class App:
         #ROW ___
         self.convVar = IntVar()
         self.convVar.set(1)
-        self.conversationsCheck = Checkbutton(master, text="Conversations", variable = self.convVar)
+        self.conversationsCheck = Checkbutton(master, text="Conversations", bg='black', variable = self.convVar)
         self.questsVar = IntVar()
         self.questsVar.set(1)
-        self.questsCheck = Checkbutton(master, text="Quests", variable = self.questsVar)
+        self.questsCheck = Checkbutton(master, text="Quests", bg='black', variable = self.questsVar)
         self.gameVar = IntVar()
         self.gameVar.set(0)
-        self.gameCheck = Checkbutton(master, text= "Game", variable = self.gameVar)
+        self.gameCheck = Checkbutton(master, text= "Game", bg='black', variable = self.gameVar)
         #LAYOUT__
         self.pathLabel.grid(row=0, sticky=E)
         self.pathEntry.grid(row=0, column=1)
@@ -221,12 +222,16 @@ class App:
                     newFile.parent.mkdir(parents=True, exist_ok=True)
                     newFile.touch(exist_ok=True)
 
-                self.mergeFile(child, secondaryPath / child.name, newFile)
+                if os.path.isfile(secondaryPath / child.name):
+                    self.mergeFile(child, secondaryPath / child.name, newFile)
+                else:
+                    print('Missing secondary file, using source language only')
+                    copyfile(child, newFile)
 
             else:
                 continue
         return None
-
+      
     def mergeFile(self, primaryFile, secondaryFile, newFile):
         primaryTree = ET.parse(primaryFile)
         primaryRoot = primaryTree.getroot()
