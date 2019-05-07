@@ -6,6 +6,9 @@ from pathlib import Path
 from shutil import copytree, copyfile
 import os
 
+if os.name == 'nt': BCKGRND = None
+else: BCKGRND = 'black'
+
 import xml.etree.ElementTree as ET
 import ast
 
@@ -36,13 +39,13 @@ class App:
         #ROW ___
         self.convVar = IntVar()
         self.convVar.set(1)
-        self.conversationsCheck = Checkbutton(master, text="Conversations", bg='black', variable = self.convVar)
+        self.conversationsCheck = Checkbutton(master, text="Conversations", bg=BCKGRND, variable = self.convVar)
         self.questsVar = IntVar()
         self.questsVar.set(1)
-        self.questsCheck = Checkbutton(master, text="Quests", bg='black', variable = self.questsVar)
+        self.questsCheck = Checkbutton(master, text="Quests", bg=BCKGRND, variable = self.questsVar)
         self.gameVar = IntVar()
         self.gameVar.set(0)
-        self.gameCheck = Checkbutton(master, text= "Game", bg='black', variable = self.gameVar)
+        self.gameCheck = Checkbutton(master, text= "Game", bg=BCKGRND, variable = self.gameVar)
         #LAYOUT__
         self.pathLabel.grid(row=0, sticky=E)
         self.pathEntry.grid(row=0, column=1)
